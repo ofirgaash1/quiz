@@ -1,14 +1,13 @@
+"use server"
 import { revalidatePath } from "next/cache";
 import { PrismaClient } from '@prisma/client';
 
-const prisma = global.prismaGlobal ?? new PrismaClient();
-
-export async function deleteUser(formData) {
-    const taskId = formData.get("user.id");
-
+ export default async function deleteUser(formData) {
+    const userId = formData.get("user.id");
+    prisma =  new PrismaClient();
     await prisma.user.delete({
         where: {
-            id: taskId
+            id: userId
         }
     });
 

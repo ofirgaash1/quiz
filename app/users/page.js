@@ -1,7 +1,8 @@
+// page.js
 "use server";
 
 import { fetchUsers } from "../actions/fetchUsers";
-import { deleteUser } from "../actions/actions"; // Import the deleteUser function
+import deleteUser from "@/app/actions/deleteUser"
 import { PrismaClient } from '@prisma/client';
 
 async function page() {
