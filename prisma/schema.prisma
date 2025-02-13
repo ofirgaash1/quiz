@@ -1,0 +1,49 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String          @id @map("_id")
+  username    String          @unique
+  email       String          @unique
+  knownWords  UserKnownWord[] // Relation through the join model
+}
+
+model EnglishWord {
+  id           String          @id @map("_id") @db.ObjectId
+  word         String          @unique
+  translations HebrewWord[]    @relation("EnglishToHebrew")
+  knownByUsers UserKnownWord[] // Relation through the join model
+}
+
+model UserKnownWord {
+  id           String        @id @map("_id") @db.ObjectId
+  userId       String        
+  wordId       String        @db.ObjectId
+  user         User          @relation(fields: [userId], references: [id])
+  word         EnglishWord   @relation(fields: [wordId], references: [id])
+
+  @@index([userId, wordId], map: "user_word_unique") // Optional, creates a unique index to avoid duplicates
+}
+
+model HebrewWord {
+  id            String        @id @map("_id") @db.ObjectId
+  word          String
+  englishWord   EnglishWord?  @relation("EnglishToHebrew", fields: [englishWordId], references: [id])
+  englishWordId String?       @db.ObjectId
+}
+
+model SRTFile {
+  id        String    @id @map("_id") @db.ObjectId
+  name      String    // Movie or series name
+  season    Int
+  episode   Int
+  language  String
+  filePath  String    // Path or URL to the SRT file
+  createdAt DateTime  @default(now())
+}
