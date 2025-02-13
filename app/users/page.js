@@ -1,31 +1,24 @@
+"use server";
+
 import { fetchUsers } from "../actions/fetchUsers";
-import { revalidatePath } from "next/cache";
+import { deleteUser } from "../actions/actions"; // Import the deleteUser function
+import { PrismaClient } from '@prisma/client';
 
 async function page() {
+    const prisma = global.prismaGlobal ?? new PrismaClient();
+
     async function currentUserID() {
         return await fetchUsers();
     }
-    const userID = currentUserID()
+    const userID = currentUserID();
 
-    const usersFromDB = async () => await prisma.user.findMany()
-    const usersFromPrisma = await usersFromDB()
-
-    const deleteUser = async (formData) => {
-        "use server"
-        const taskId = formData.get("user.id");
-    
-        await prisma.user.delete({
-            where: {
-                id: taskId
-            }
-        });
-        revalidatePath("/users");
-    };
+    const usersFromDB = async () => await prisma.user.findMany();
+    const usersFromPrisma = await usersFromDB();
 
     return (
         <>
             {usersFromPrisma.map(user =>
-                <div className="p-3">
+                <div className="p-3" key={user.id}>
                     <p>
                         <span>User Name:</span> <span className="bg-amber-100"> {user.username} </span>
                     </p>
@@ -40,12 +33,9 @@ async function page() {
                         <button type="submit" className="bg-red-400 rounded-xl p-2">Delete</button>
                     </form>
                 </div>
-
-            )
-            }
+            )}
         </>
-    )
-
+    );
 }
 
-export default page
+export default page;
