@@ -3,28 +3,28 @@ generator client {
 }
 
 datasource db {
-  provider = "mongodb"
+  provider = "postgresql"
   url      = env("DATABASE_URL")
 }
 
 model user {
-  id          String          @id @map("_id")
+  id          String          @id @default(uuid())
   username    String          @unique
   email       String          @unique
   knownWords  UserKnownWord[] // Relation through the join model
 }
 
 model EnglishWord {
-  id           String          @id @map("_id") @db.ObjectId
+  id           String          @id @default(uuid())
   word         String          @unique
   translations HebrewWord[]    @relation("EnglishToHebrew")
   knownByUsers UserKnownWord[] // Relation through the join model
 }
 
 model UserKnownWord {
-  id           String        @id @map("_id") @db.ObjectId
+  id           String        @id @default(uuid())
   userId       String        
-  wordId       String        @db.ObjectId
+  wordId       String        
   user         user          @relation(fields: [userId], references: [id])
   word         EnglishWord   @relation(fields: [wordId], references: [id])
 
@@ -32,14 +32,14 @@ model UserKnownWord {
 }
 
 model HebrewWord {
-  id            String        @id @map("_id") @db.ObjectId
+  id            String        @id @default(uuid())
   word          String
   englishWord   EnglishWord?  @relation("EnglishToHebrew", fields: [englishWordId], references: [id])
-  englishWordId String?       @db.ObjectId
+  englishWordId String?       
 }
 
 model SRTFile {
-  id        String    @id @map("_id") @db.ObjectId
+  id        String    @id @default(uuid())
   name      String    // Movie or series name
   season    Int
   episode   Int
