@@ -20,7 +20,7 @@ export const currentUserID = async () => {
                 username = clerkUser?.firstName + " " + clerkUser?.lastName
             }
 
-            const newUser: any = {
+            const newUser = {
                 username,
                 email: clerkUser?.emailAddresses[0].emailAddress,
                 id: clerkUser?.id
@@ -37,7 +37,9 @@ export const currentUserID = async () => {
         })
 
         return (mongoUser.id)
-    } catch (error) {
+        
+    } catch (e) {
+        console.log(e)
         return 0
     }
 }
