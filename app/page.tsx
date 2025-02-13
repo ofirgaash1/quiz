@@ -1,8 +1,9 @@
-import Hero from "@/components/hero"
+import Hero from "@/components/Hero"
 
 const home = () => {
   return (
     <div>
+
       <Hero />
     </div>
   )

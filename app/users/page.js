@@ -1,9 +1,12 @@
 import deleteUser from "@/app/actions/deleteUser"
 import usersOnDB from "@/app/actions/usersOnDB"
-
+import { currentUser } from "@clerk/nextjs/server";
 async function page() {
     const usersFromPrisma = await usersOnDB()
- 
+    const user = await currentUser()
+    const userID = user.id
+    console.log(userID);
+    
     return (
         <>
             {usersFromPrisma.map(user => (
@@ -24,6 +27,7 @@ async function page() {
                 </div>
                 )
             )}
+            your user id: {userID}
         </>
     );
 }

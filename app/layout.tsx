@@ -31,9 +31,6 @@ export default function RootLayout(
   { children }: Readonly<{ children: React.ReactNode; }>
 ) {
 
-
-  const userID = currentUserID()
-
   return (
     <ClerkProvider>
       <html lang="en">
@@ -43,7 +40,6 @@ export default function RootLayout(
           {children}
           </div>
           <Footer />
-          your user id is:  {userID}
         </body>
       </html>
     </ClerkProvider>

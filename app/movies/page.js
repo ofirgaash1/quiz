@@ -15,32 +15,27 @@ export default function Home() {
     setSelectedFile(e.target.files[0]);
   };
 
+
   const handleUpload = async () => {
-    if (!selectedFile) return;
+    const fileInput = document.getElementById("fileInput"); // Replace with your HTML element ID
+    const file = fileInput.files[0];
 
     const formData = new FormData();
-    formData.append('file', selectedFile);
+    formData.append("file", file);
 
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      headers: {
-        'file-name': selectedFile.name,
-      },
-      body: selectedFile,
-    });
-
-    if (response.ok) {
-      alert('File uploaded successfully!');
-      window.location.reload(); // Refresh the page to show the updated list
-    } else {
-      alert('Failed to upload file.');
-    }
+    fetch("/actions/upload", {
+      method: "POST",
+      body: formData,
+    })
+      .then(response => response.json())
+      .then(data => console.log(data))
+      .catch(error => console.error(error));
   };
 
   return (
     <div>
       <h1>Upload SRT Files</h1>
-      <input type="file" accept=".srt" onChange={handleFileChange} />
+      <input id='fileInput' type="file" accept=".srt" onChange={handleFileChange} />
       <button onClick={handleUpload}>Upload</button>
 
       <h2>Uploaded SRT Files</h2>
