@@ -1,20 +1,8 @@
-// page.js
-"use server";
-
-import { fetchUsers } from "../actions/fetchUsers";
 import deleteUser from "@/app/actions/deleteUser"
-import { PrismaClient } from '@prisma/client';
+import usersOnDB from "@/app/actions/usersOnDB"
 
 async function page() {
-    const prisma = global.prismaGlobal ?? new PrismaClient();
-
-    async function currentUserID() {
-        return await fetchUsers();
-    }
-    const userID = currentUserID();
-
-    const usersFromDB = async () => await prisma.user.findMany();
-    const usersFromPrisma = await usersFromDB();
+    const usersFromPrisma = await usersOnDB()
 
     return (
         <>

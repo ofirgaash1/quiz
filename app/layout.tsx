@@ -10,9 +10,8 @@ import {
 } from '@clerk/nextjs'
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { fetchUsers } from "./actions/fetchUsers";
-import { json } from "stream/consumers";
-import { stringify } from "querystring";
+import { currentUserID } from "./actions/currentUserID";
+
 
 
 const geistSans = Geist({
@@ -34,9 +33,6 @@ export default function RootLayout(
   { children }: Readonly<{ children: React.ReactNode; }>
 ) {
 
-  async function currentUserID(): Promise<any> {
-    return await fetchUsers();
-  }
 
   const userID = currentUserID()
 

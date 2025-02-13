@@ -3,7 +3,7 @@
 import { prisma } from "@/lib/prisma"
 import { currentUser } from "@clerk/nextjs/server"
 
-export const fetchUsers = async () => {
+export const currentUserID = async () => {
     try {
         const clerkUser = await currentUser()
 
