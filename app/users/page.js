@@ -3,10 +3,10 @@ import usersOnDB from "@/app/actions/usersOnDB"
 
 async function page() {
     const usersFromPrisma = await usersOnDB()
-
+ 
     return (
         <>
-            {usersFromPrisma.map(user =>
+            {usersFromPrisma.map(user => (
                 <div className="p-3" key={user.id}>
                     <p>
                         <span>User Name:</span> <span className="bg-amber-100"> {user.username} </span>
@@ -22,6 +22,7 @@ async function page() {
                         <button type="submit" className="bg-red-400 rounded-xl p-2">Delete</button>
                     </form>
                 </div>
+                )
             )}
         </>
     );

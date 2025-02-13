@@ -10,9 +10,7 @@ import {
 } from '@clerk/nextjs'
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import { currentUserID } from "./actions/currentUserID";
-
-
+import {currentUserID} from "./actions/currentUserID";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
