@@ -1,26 +1,47 @@
-import { NextResponse } from "next/server";
-import path from "path";
-import { writeFile } from "fs/promises";
-
-export const POST = async (req, res) => {
-  const formData = await req.formData();
-
-  const file = formData.get("file");
-  if (!file) {
-    return NextResponse.json({ error: "No files received." }, { status: 400 });
-  }
-
-  const buffer = Buffer.from(await file.arrayBuffer());
-  const filename =  file.name.replaceAll(" ", "_");
-  console.log(filename);
+import { currentUser } from '@clerk/nextjs/server';
+import { handleUpload } from '@vercel/blob/client';
+import { NextResponse } from 'next/server';
+import currentUserID from "../../actions/currentUserID"
+export async function POST(request) {
+  const body = await request.json();
+ 
   try {
-    await writeFile(
-      path.join(process.cwd(), "public/assets/" + filename),
-      buffer
-    );
-    return NextResponse.json({ Message: "Success", status: 201 });
+    const jsonResponse = await handleUpload({body, request,
+      onBeforeGenerateToken: async (pathname /*, clientPayload */) => {
+        // Generate a client token for the browser to upload the file
+        // ⚠️ Authenticate and authorize users before generating the token.
+        // Otherwise, you're allowing anonymous uploads.
+        const usr = await currentUserID()
+        return {
+          tokenPayload: JSON.stringify({usr
+            // optional, sent to your server on upload completion
+            // you could pass a user id from auth, or a value from clientPayload
+          }),
+        };
+      },
+      onUploadCompleted: async ({ blob, tokenPayload }) => {
+        // Get notified of client upload completion
+        // ⚠️ This will not work on `localhost` websites,
+        // Use ngrok or similar to get the full upload flow
+ 
+        console.log('blob upload completed', blob, tokenPayload);
+ 
+        try {
+          // Run any logic after the file upload completed
+          // const { userId } = JSON.parse(tokenPayload);
+          // await db.update({ avatar: blob.url, userId });
+        } catch (error) {
+          throw new Error('Could not update user');
+        }
+      },
+    });
+
+    return NextResponse.json(jsonResponse);
+
   } catch (error) {
-    console.log("Error occured ", error);
-    return NextResponse.json({ Message: "Failed", status: 500 });
+    return NextResponse.json(
+      { error: (error).message },
+      { status: 400 }, // The webhook will retry 5 times waiting for a status 200
+    );
   }
-};
+}
