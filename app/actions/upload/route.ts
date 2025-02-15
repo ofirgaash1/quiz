@@ -16,7 +16,7 @@ export async function POST(request: Request): Promise<NextResponse> {
           // ⚠️ Authenticate and authorize users before generating the token.
           // Otherwise, you're allowing anonymous uploads.
           return {
-            allowedContentTypes: ['image/*'],
+            allowedContentTypes: ['application/x-subrip'],
             maximumSizeInBytes: 50 * 1024 * 1024, // 50MB
           }
         },
