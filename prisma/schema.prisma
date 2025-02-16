@@ -7,7 +7,7 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model user {
+model User {
   id          String          @id @default(uuid())
   username    String          @unique
   email       String          @unique
@@ -19,6 +19,16 @@ model EnglishWord {
   word         String          @unique
   translations HebrewWord[]    @relation("EnglishToHebrew")
   knownByUsers UserKnownWord[] // Relation through the join model
+}
+
+model UserSRTFile {
+  userId   String
+  srtFileId String
+
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  srtFile  SRTFile @relation(fields: [srtFileId], references: [id], onDelete: Cascade)
+
+  @@id([userId, srtFileId]) // Composite primary key
 }
 
 model UserKnownWord {

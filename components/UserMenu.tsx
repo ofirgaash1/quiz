@@ -9,7 +9,7 @@ const UserMenu = () => {
   }
   const links = [
     {
-      name: "Subtitles", path: "/movies"
+      name: "Upload Subtitles", path: "/upload"
     },
     {
       name: "Level", path: "/level"
