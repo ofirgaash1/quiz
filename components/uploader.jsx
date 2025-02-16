@@ -4,7 +4,7 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { upload } from '@vercel/blob/client';
 import ProgressBar from './progress-bar';
-import {uploadSVG} from '@/public/uploadSVG'
+import UploadSVG from "@/components/UploadSVG"
 export default function Uploader() {
     const [file, setFile] = useState(null);
     const [dragActive, setDragActive] = useState(false);
