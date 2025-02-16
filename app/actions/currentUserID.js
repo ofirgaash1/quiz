@@ -7,36 +7,38 @@ export const currentUserID = async () => {
     try {
         const clerkUser = await currentUser()
 
-        let mongoUser = null
-        mongoUser = await prisma.user.findUnique({
+        let neonUser = null
+        neonUser = await prisma.user.findUnique({
             where: {
                 id: clerkUser?.id
             }
         })
-
-        if (!mongoUser) {
+        
+        if (!neonUser) {
+            console.log("@@@@@@ not neonUser");
+            
             let username = clerkUser?.username
             if (!username) {
                 username = clerkUser?.firstName + " " + clerkUser?.lastName
             }
-
+            username = clerkUser?.firstName + " " + clerkUser?.lastName
             const newUser = {
                 username,
                 email: clerkUser?.emailAddresses[0].emailAddress,
                 id: clerkUser?.id
             }
-            mongoUser = await prisma.user.create({
+            neonUser = await prisma.user.create({
                 data: newUser
             })
         }
 
         const quizResults = await prisma.userKnownWord.count({
             where: {
-                userId: mongoUser.id
+                userId: neonUser.id
             }
         })
 
-        return (mongoUser.id)
+        return (neonUser.id)
         
     } catch (e) {
         console.log(e)

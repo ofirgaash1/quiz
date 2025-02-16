@@ -11,31 +11,61 @@ export default function Uploader() {
     const [dragActive, setDragActive] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
     const [progress, setProgress] = useState(0);
+    
+    // Metadata fields
+    const [name, setName] = useState('');
+    const [season, setSeason] = useState('');
+    const [episode, setEpisode] = useState('');
+    const [language, setLanguage] = useState('hebrew'); // Default to Hebrew
 
     const reset = () => {
         setIsUploading(false);
         setFile(null);
+        setName('');
+        setSeason('');
+        setEpisode('');
+        setLanguage('hebrew');
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!file) return;
+        if (!file || !name || !season || !episode || !language) {
+            return toast.error('All fields are required');
+        }
         setIsUploading(true);
         
         try {
+            // Upload to Vercel Blob
             const blob = await upload(file.name, file, {
                 access: 'public',
                 handleUploadUrl: '/actions/upload',
                 onUploadProgress: (progressEvent) => setProgress(progressEvent.percentage),
             });
+
+            // Save metadata in NeonDB
+            const res = await fetch('/api/upload-srt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name,
+                    season: parseInt(season, 10),
+                    episode: parseInt(episode, 10),
+                    language,
+                    filePath: blob.url,
+                }),
+            });
+
+            if (!res.ok) throw new Error('Failed to save metadata');
+
             toast.success(
                 <span>
                     File uploaded! <a href={blob.url} target="_blank" className="underline">View file</a>
                 </span>
             );
         } catch (error) {
-            toast.error(error instanceof Error ? error.message : 'Upload failed');
+            toast.error(error.message || 'Upload failed');
         }
+
         reset();
     };
 
@@ -56,6 +86,44 @@ export default function Uploader() {
             <h1>Upload subtitle files for public use.</h1>
             <h2 className="text-lg font-semibold">Upload a subtitle file</h2>
 
+            {/* Series Name */}
+            <input
+                type="text"
+                placeholder="Series name"
+                className="border p-2 rounded-md"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+            />
+
+            {/* Season */}
+            <input
+                type="number"
+                placeholder="Season"
+                className="border p-2 rounded-md"
+                value={season}
+                onChange={(e) => setSeason(e.target.value)}
+            />
+
+            {/* Episode */}
+            <input
+                type="number"
+                placeholder="Episode"
+                className="border p-2 rounded-md"
+                value={episode}
+                onChange={(e) => setEpisode(e.target.value)}
+            />
+
+            {/* Language Dropdown */}
+            <select
+                className="border p-2 rounded-md"
+                value={language}
+                onChange={(e) => setLanguage(e.target.value)}
+            >
+                <option value="hebrew">Hebrew</option>
+                <option value="english">English</option>
+            </select>
+
+            {/* File Upload */}
             <label
                 htmlFor="subtitle-upload"
                 className={`relative flex h-32 cursor-pointer items-center justify-center rounded-md border p-4 transition ${dragActive ? 'border-2 border-black' : 'border-gray-300'}`}
@@ -80,7 +148,7 @@ export default function Uploader() {
             </label>
             
             {isUploading && <ProgressBar value={progress} />}
-            
+
             <button
                 type="submit"
                 disabled={!file || isUploading}
