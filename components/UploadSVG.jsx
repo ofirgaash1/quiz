@@ -1,4 +1,4 @@
-const UploadSVG = () => {
+const UploadSVG = ({dragActive}) => {
     return (
         <>
         <svg
