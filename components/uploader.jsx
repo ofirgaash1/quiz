@@ -4,8 +4,9 @@ import { useState } from 'react';
 import toast from 'react-hot-toast';
 import { upload } from '@vercel/blob/client';
 import ProgressBar from './progress-bar';
-import UploadSVG from "@/components/UploadSVG"
+import { UploadSVG } from './UploadSVG';
 export default function Uploader() {
+    
     const [file, setFile] = useState(null);
     const [dragActive, setDragActive] = useState(false);
     const [isUploading, setIsUploading] = useState(false);
@@ -81,6 +82,7 @@ export default function Uploader() {
 
     return (
         <form className="grid gap-6" onSubmit={handleSubmit}>
+            <div><UploadSVG/></div>
             <h1>Here, you can contribute subtitles to the site. These will be publicly available.</h1>
             <div>
                 <div className="space-y-1 mb-4">
@@ -125,7 +127,7 @@ export default function Uploader() {
                                 : 'bg-white opacity-100 hover:bg-gray-50'
                             }`}
                     >
-                        <uploadSVG/>
+                        
                         
                         <p className="mt-2 text-center text-sm text-gray-500">
                             Drag and drop or click to upload.
