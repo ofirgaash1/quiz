@@ -1,24 +1,24 @@
-'use client'
+'use client';
 
-import { useState, type FormEvent } from 'react'
-import toast from 'react-hot-toast'
-import { upload } from '@vercel/blob/client'
-import ProgressBar from './progress-bar'
-
+import { useState } from 'react';
+import toast from 'react-hot-toast';
+import { upload } from '@vercel/blob/client';
+import ProgressBar from './progress-bar';
+import {uploadSVG} from '@/public/uploadSVG'
 export default function Uploader() {
-    const [file, setFile] = useState<File | null>(null)
-    const [dragActive, setDragActive] = useState(false)
-    const [isUploading, setIsUploading] = useState(false)
-    const [progress, setProgress] = useState(0)
+    const [file, setFile] = useState(null);
+    const [dragActive, setDragActive] = useState(false);
+    const [isUploading, setIsUploading] = useState(false);
+    const [progress, setProgress] = useState(0);
 
     function reset() {
-        setIsUploading(false)
-        setFile(null)
+        setIsUploading(false);
+        setFile(null);
     }
 
-    async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-        e.preventDefault()
-        setIsUploading(true)
+    async function handleSubmit(e) {
+        e.preventDefault();
+        setIsUploading(true);
 
         if (file) {
             try {
@@ -26,12 +26,12 @@ export default function Uploader() {
                     access: 'public',
                     handleUploadUrl: '/actions/upload',
                     onUploadProgress: (progressEvent) => {
-                        setProgress(progressEvent.percentage)
+                        setProgress(progressEvent.percentage);
                     },
-                })
+                });
 
                 toast(
-                    (t: { id: string }) => (
+                    (t) => (
                         <div className="relative">
                             <div className="p-2">
                                 <p className="font-semibold text-gray-900">File uploaded!</p>
@@ -50,38 +50,38 @@ export default function Uploader() {
                         </div>
                     ),
                     { duration: Number.POSITIVE_INFINITY }
-                )
+                );
             } catch (error) {
                 if (error instanceof Error) {
-                    toast.error(error.message)
+                    toast.error(error.message);
                 } else {
-                    throw error
+                    throw error;
                 }
             }
 
-            reset()
+            reset();
         }
     }
 
-    function handleFileChange(file: File) {
-        toast.dismiss()
+    function handleFileChange(file) {
+        toast.dismiss();
 
         if (!file.name.endsWith('.srt')) {
-            toast.error('We only accept .srt subtitle files')
-            return
+            toast.error('We only accept .srt subtitle files');
+            return;
         }
 
         if (file.size / 1024 / 1024 > 50) {
-            toast.error('File size too big (max 50MB)')
-            return
+            toast.error('File size too big (max 50MB)');
+            return;
         }
 
-        setFile(file)
+        setFile(file);
     }
 
     return (
         <form className="grid gap-6" onSubmit={handleSubmit}>
-            <h1>Here, you can contribute subtitles to the site. these will be publicly available.</h1>
+            <h1>Here, you can contribute subtitles to the site. These will be publicly available.</h1>
             <div>
                 <div className="space-y-1 mb-4">
                     <h2 className="text-xl font-semibold">Upload a subtitle file</h2>
@@ -93,28 +93,28 @@ export default function Uploader() {
                     <div
                         className="absolute z-[5] h-full w-full rounded-md"
                         onDragOver={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            setDragActive(true)
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDragActive(true);
                         }}
                         onDragEnter={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            setDragActive(true)
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDragActive(true);
                         }}
                         onDragLeave={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            setDragActive(false)
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDragActive(false);
                         }}
                         onDrop={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            setDragActive(false)
+                            e.preventDefault();
+                            e.stopPropagation();
+                            setDragActive(false);
 
-                            const file = e.dataTransfer?.files?.[0]
+                            const file = e.dataTransfer?.files?.[0];
                             if (file) {
-                                handleFileChange(file)
+                                handleFileChange(file);
                             }
                         }}
                     />
@@ -125,24 +125,8 @@ export default function Uploader() {
                                 : 'bg-white opacity-100 hover:bg-gray-50'
                             }`}
                     >
-                        <svg
-                            className={`${dragActive ? 'scale-110' : 'scale-100'
-                                } h-7 w-7 text-gray-500 transition-all duration-75 group-hover:scale-110 group-active:scale-95`}
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="24"
-                            height="24"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                        >
-                            <title>Upload icon</title>
-                            <path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" />
-                            <path d="M12 12v9" />
-                            <path d="m16 16-4-4-4 4" />
-                        </svg>
+                        <uploadSVG/>
+                        
                         <p className="mt-2 text-center text-sm text-gray-500">
                             Drag and drop or click to upload.
                         </p>
@@ -160,9 +144,9 @@ export default function Uploader() {
                         accept=".srt"
                         className="sr-only"
                         onChange={(event) => {
-                            const file = event.currentTarget?.files?.[0]
+                            const file = event.currentTarget?.files?.[0];
                             if (file) {
-                                handleFileChange(file)
+                                handleFileChange(file);
                             }
                         }}
                     />
@@ -190,5 +174,5 @@ export default function Uploader() {
                 </button>
             </div>
         </form>
-    )
+    );
 }
