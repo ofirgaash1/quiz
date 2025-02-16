@@ -8,17 +8,23 @@ datasource db {
 }
 
 model User {
-  id          String          @id @default(uuid())
-  username    String          @unique
-  email       String          @unique
-  knownWords  UserKnownWord[] // Relation through the join model
+  id       String          @id @default(uuid())
+  username String          @unique
+  email    String          @unique
+
+  srtFiles UserSRTFile[] // 👈 Define the opposite relation here
 }
 
-model EnglishWord {
-  id           String          @id @default(uuid())
-  word         String          @unique
-  translations HebrewWord[]    @relation("EnglishToHebrew")
-  knownByUsers UserKnownWord[] // Relation through the join model
+model SRTFile {
+  id        String        @id @default(uuid())
+  name      String        
+  season    Int
+  episode   Int
+  language  String
+  filePath  String        
+  createdAt DateTime      @default(now())
+
+  users     UserSRTFile[] // 👈 Define the opposite relation here
 }
 
 model UserSRTFile {
@@ -31,29 +37,3 @@ model UserSRTFile {
   @@id([userId, srtFileId]) // Composite primary key
 }
 
-model UserKnownWord {
-  id           String        @id @default(uuid())
-  userId       String        
-  wordId       String        
-  user         user          @relation(fields: [userId], references: [id])
-  word         EnglishWord   @relation(fields: [wordId], references: [id])
-
-  @@index([userId, wordId], map: "user_word_unique") // Optional, creates a unique index to avoid duplicates
-}
-
-model HebrewWord {
-  id            String        @id @default(uuid())
-  word          String
-  englishWord   EnglishWord?  @relation("EnglishToHebrew", fields: [englishWordId], references: [id])
-  englishWordId String?       
-}
-
-model SRTFile {
-  id        String    @id @default(uuid())
-  name      String    // Movie or series name
-  season    Int
-  episode   Int
-  language  String
-  filePath  String    // Path or URL to the SRT file
-  createdAt DateTime  @default(now())
-}

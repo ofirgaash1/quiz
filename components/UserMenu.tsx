@@ -9,6 +9,9 @@ const UserMenu = () => {
   }
   const links = [
     {
+      name: "Favorites", path: "/favorites"
+    },
+    {
       name: "Upload Subtitles", path: "/upload"
     },
     {
