@@ -1,5 +1,6 @@
-const uploadSVG = () => {
+const UploadSVG = ({dragActive}) => {
     return (
+        <>
         <svg
             className={`${dragActive ? 'scale-110' : 'scale-100'
                 } h-7 w-7 text-gray-500 transition-all duration-75 group-hover:scale-110 group-active:scale-95`}
@@ -18,7 +19,8 @@ const uploadSVG = () => {
             <path d="M12 12v9" />
             <path d="m16 16-4-4-4 4" />
         </svg>
+        </>
     )
 }
 
-export default uploadSVG
+export default UploadSVG

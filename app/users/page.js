@@ -1,12 +1,12 @@
 import deleteUser from "@/app/actions/deleteUser"
 import usersOnDB from "@/app/actions/usersOnDB"
-import { currentUser } from "@clerk/nextjs/server";
+import { currentUserID } from "../actions/currentUserID";
 async function page() {
+    // update neon users table:
+    const userID = await currentUserID()
+
     const usersFromPrisma = await usersOnDB()
-    const user = await currentUser()
-    const userID = user.id
-    console.log(userID);
-    
+
     return (
         <>
             {usersFromPrisma.map(user => (
