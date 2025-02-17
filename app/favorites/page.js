@@ -1,12 +1,11 @@
 'use client';
 import React, { useState, useEffect } from 'react';
-import AnimatedCheckbox from '@/components/AnimatedCheckbox';
-import ExpandCollapseIcon from '@/components/ExpandCollapseIcon';
 import EditModal from '@/components/EditModal';
 import ShowRow from '@/components/ShowRow';
 import SeasonRow from '@/components/SeasonRow';
 import EpisodeRow from '@/components/EpisodeRow';
-
+import toast from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
 
 export default function FavoritesPage() {
   // Shows structure: { [showName]: { [seasonNumber]: [ {id, episode}, ... ] } }
@@ -67,6 +66,20 @@ export default function FavoritesPage() {
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
+  const handleSave = async () => {
+    const selectedIds = Object.keys(selectedEpisodes).filter((id) => selectedEpisodes[id]);
+    await fetch('/api/userSRTFile', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ episodeIds: selectedIds }),
+    });
+    toast.success(
+      <span>
+        Favorites saved successfully!{' '}
+      </span>
+    );
+  };
+
   // Submit the updated episode to the server and update local state
   const handleUpdate = async () => {
     await fetch('/api/srtFiles', {
@@ -99,6 +112,7 @@ export default function FavoritesPage() {
 
   return (
     <div className="container mx-auto p-8">
+      <Toaster />
       <h1 className="text-4xl font-bold text-center mb-8">Select & Edit Episodes</h1>
 
       <table className="min-w-full border-collapse">
@@ -154,6 +168,14 @@ export default function FavoritesPage() {
         onCancel={() => setEditing(null)}
         onUpdate={handleUpdate}
       />
+            <div className="mt-8 text-center">
+        <button
+          onClick={handleSave}
+          className="bg-blue-600 text-white px-8 py-3 rounded-lg text-lg hover:bg-blue-700 transition-colors duration-200"
+        >
+          Save Favorites
+        </button>
+      </div>
     </div>
   );
 }
