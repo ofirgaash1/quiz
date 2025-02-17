@@ -7,33 +7,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model User {
-  id       String          @id @default(uuid())
-  username String          @unique
-  email    String          @unique
+model Word {
+  id          String @id @default(uuid())
+  text        String
+  level       String
+  translation String
 
-  srtFiles UserSRTFile[] // 👈 Define the opposite relation here
+  users    UsersWord[]
+  srtFiles WordsSRTFile[]
+}
+
+model UsersWord{
+  userId String
+  wordId String
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  word Word @relation(fields: [wordId], references: [id], onDelete: Cascade)
+
+  @@id([userId, wordId]) // Composite primary key
+}
+
+model WordsSRTFile {
+  wordId    String
+  srtFileId String
+
+  word    Word    @relation(fields: [wordId], references: [id], onDelete: Cascade)
+  srtFile SRTFile @relation(fields: [srtFileId], references: [id], onDelete: Cascade)
+
+  @@id([wordId, srtFileId]) // Composite primary key
+}
+
+model User {
+  id       String @id @default(uuid())
+  username String @unique
+  email    String @unique
+
+  srtFiles  UserSRTFile[] // 👈 Define the opposite relation here
+  words UsersWord[]
 }
 
 model SRTFile {
-  id        String        @id @default(uuid())
-  name      String        
+  id        String   @id @default(uuid())
+  name      String
   season    Int
   episode   Int
   language  String
-  filePath  String        
-  createdAt DateTime      @default(now())
+  filePath  String
+  createdAt DateTime @default(now())
 
-  users     UserSRTFile[] // 👈 Define the opposite relation here
+  words WordsSRTFile[]
+  users UserSRTFile[] // 👈 Define the opposite relation here
 }
 
 model UserSRTFile {
-  userId   String
+  userId    String
   srtFileId String
 
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  srtFile  SRTFile @relation(fields: [srtFileId], references: [id], onDelete: Cascade)
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  srtFile SRTFile @relation(fields: [srtFileId], references: [id], onDelete: Cascade)
 
   @@id([userId, srtFileId]) // Composite primary key
 }
-
