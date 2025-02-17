@@ -32,12 +32,6 @@ export const currentUserID = async () => {
             })
         }
 
-        const quizResults = await prisma.userKnownWord.count({
-            where: {
-                userId: neonUser.id
-            }
-        })
-
         return (neonUser.id)
         
     } catch (e) {

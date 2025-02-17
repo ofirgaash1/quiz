@@ -1,9 +1,10 @@
 // app/api/srtFiles/route.js
 import { NextResponse } from 'next/server';
-import prisma from '@/lib/prisma';
+import { prisma } from '@/lib/prisma';
 
 export async function GET() {
-  const srtFiles = await prisma.sRTFile.findMany({
+
+  const srtFiles = await prisma.SRTFile.findMany({
     select: {
       id: true,
       name: true,
