@@ -1,6 +1,5 @@
 "use server"
 import { revalidatePath } from "next/cache";
-import { PrismaClient } from '@prisma/client';
 import { prisma } from "@/lib/prisma"
 
  export default async function deleteUser(formData) {
