@@ -2,26 +2,31 @@
 import React, { useState, useEffect } from 'react';
 import AnimatedCheckbox from '@/components/AnimatedCheckbox';
 import ExpandCollapseIcon from '@/components/ExpandCollapseIcon';
+import EditModal from '@/components/EditModal';
+import ShowRow from '@/components/ShowRow';
+import SeasonRow from '@/components/SeasonRow';
+import EpisodeRow from '@/components/EpisodeRow';
+
 
 export default function FavoritesPage() {
-  // State to store shows/seasons/episodes in a structured format
+  // Shows structure: { [showName]: { [seasonNumber]: [ {id, episode}, ... ] } }
   const [shows, setShows] = useState({});
-  // State to keep track of which episodes are selected (checkbox)
+  // Selected episodes (checkboxes)
   const [selectedEpisodes, setSelectedEpisodes] = useState({});
-  // State to keep track of which items (shows/seasons) are expanded
+  // Track which show/season is expanded
   const [expanded, setExpanded] = useState({});
-  // State for the editing modal (null if not editing)
+  // Track editing state (null if no episode is being edited)
   const [editing, setEditing] = useState(null);
-  // State for the edit form fields
+  // Edit form fields
   const [editForm, setEditForm] = useState({ id: '', name: '', season: '', episode: '' });
 
-  // Fetch show/episode data + user selections on mount
+  // Fetch data on mount
   useEffect(() => {
     Promise.all([
       fetch('/api/srtFiles').then((res) => res.json()),
       fetch('/api/userSRTFile').then((res) => res.json()),
     ]).then(([files, userData]) => {
-      // Convert fetched files into a structure: { showName: { seasonNumber: [ {id, episode}, ... ] } }
+      // Convert array of files into a nested { show -> season -> [episodes] } structure
       const structuredShows = files.reduce((acc, { name, season, id, episode }) => {
         acc[name] = acc[name] || {};
         acc[name][season] = acc[name][season] || [];
@@ -29,7 +34,7 @@ export default function FavoritesPage() {
         return acc;
       }, {});
 
-      // Convert user’s episode IDs into a lookup for the checkboxes
+      // Convert user’s episodeIds into a lookup object (true/false)
       const selections = (userData.episodeIds || []).reduce((map, id) => {
         map[id] = true;
         return map;
@@ -40,24 +45,29 @@ export default function FavoritesPage() {
     });
   }, []);
 
-  // Expand/collapse logic for shows or seasons
+  // Toggle expand/collapse for a given key (show or season)
   const toggleExpand = (key) => {
     setExpanded((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
-  // When the user clicks the "Edit" button on an episode
+  // Toggle the checkbox for a specific episode ID
+  const toggleEpisodeSelection = (id) => {
+    setSelectedEpisodes((prev) => ({ ...prev, [id]: !prev[id] }));
+  };
+
+  // When user clicks "Edit," set up the editing state
   const handleEdit = (episodeObj) => {
     setEditing(episodeObj);
     setEditForm(episodeObj);
   };
 
-  // Handle changes to the edit form fields
+  // Handle form field changes in the Edit Modal
   const handleChange = (e) => {
     const { name, value } = e.target;
     setEditForm((prev) => ({ ...prev, [name]: value }));
   };
 
-  // Send updated episode info to the server, then update local state
+  // Submit the updated episode to the server and update local state
   const handleUpdate = async () => {
     await fetch('/api/srtFiles', {
       method: 'PATCH',
@@ -69,7 +79,7 @@ export default function FavoritesPage() {
       }),
     });
 
-    // Update our local shows state to reflect the new episode number
+    // Update local "shows" state with new episode data
     setShows((prev) => {
       const { name, season, id, episode } = editForm;
       return {
@@ -83,86 +93,51 @@ export default function FavoritesPage() {
       };
     });
 
-    // Close the edit modal
+    // Close the modal
     setEditing(null);
-  };
-
-  // Toggle the checkbox selection of an episode
-  const toggleEpisodeSelection = (id) => {
-    setSelectedEpisodes((prev) => ({ ...prev, [id]: !prev[id] }));
   };
 
   return (
     <div className="container mx-auto p-8">
-      {/* Page Title */}
       <h1 className="text-4xl font-bold text-center mb-8">Select & Edit Episodes</h1>
 
-      {/* Main table */}
       <table className="min-w-full border-collapse">
         <tbody>
           {Object.entries(shows).map(([showName, seasons]) => (
             <React.Fragment key={showName}>
-              {/* Row for the entire show */}
-              <tr className="bg-gray-200 border-b border-gray-300">
-                <td className="p-4 w-12">
-                  <button onClick={() => toggleExpand(showName)}>
-                    <ExpandCollapseIcon expanded={expanded[showName]} />
-                  </button>
-                </td>
-                {/* Use colSpan to merge columns, so we have consistent total columns */}
-                <td className="p-4 text-xl font-semibold" colSpan={2}>
-                  {showName}
-                </td>
-              </tr>
+              {/* Render the show row */}
+              <ShowRow
+                showName={showName}
+                expanded={expanded[showName]}
+                onToggle={() => toggleExpand(showName)}
+              />
 
-              {/* Rows for each season within the show, only if show is expanded */}
+              {/* If the show is expanded, render its seasons */}
               {expanded[showName] &&
                 Object.entries(seasons).map(([seasonNum, episodes]) => (
                   <React.Fragment key={seasonNum}>
-                    {/* Row for the season */}
-                    <tr className="bg-gray-100 border-b border-gray-200">
-                      <td className="p-4 w-12 pl-6">
-                        <button onClick={() => toggleExpand(`${showName}-${seasonNum}`)}>
-                          <ExpandCollapseIcon expanded={expanded[`${showName}-${seasonNum}`]} />
-                        </button>
-                      </td>
-                      <td className="p-4 text-lg" colSpan={2}>
-                        Season {seasonNum}
-                      </td>
-                    </tr>
+                    {/* Render the season row */}
+                    <SeasonRow
+                      showName={showName}
+                      seasonNum={seasonNum}
+                      expanded={expanded[`${showName}-${seasonNum}`]}
+                      onToggle={() => toggleExpand(`${showName}-${seasonNum}`)}
+                    />
 
-                    {/* Rows for each episode within the season, only if season is expanded */}
+                    {/* If the season is expanded, render its episodes */}
                     {expanded[`${showName}-${seasonNum}`] &&
                       episodes.map((ep) => (
-                        <tr
+                        <EpisodeRow
                           key={ep.id}
-                          className="bg-white border-b border-gray-100 hover:bg-gray-50"
-                        >
-                          {/* Episode checkbox */}
-                          <td className="p-4 pl-6 align-middle">
-                            <AnimatedCheckbox
-                              checked={!!selectedEpisodes[ep.id]}
-                              onChange={() => toggleEpisodeSelection(ep.id)}
-                            />
-                          </td>
-                          {/* Episode number text */}
-                          <td className="p-4 align-middle">Episode {ep.episode}</td>
-                          {/* Edit button */}
-                          <td className="p-4 align-middle text-right">
-                            <button
-                              className="text-blue-600 underline"
-                              onClick={() =>
-                                handleEdit({
-                                  ...ep,
-                                  name: showName,
-                                  season: seasonNum,
-                                })
-                              }
-                            >
-                              Edit
-                            </button>
-                          </td>
-                        </tr>
+                          ep={ep}
+                          showName={showName}
+                          seasonNum={seasonNum}
+                          selected={!!selectedEpisodes[ep.id]}
+                          onCheckboxToggle={() => toggleEpisodeSelection(ep.id)}
+                          onEdit={() =>
+                            handleEdit({ ...ep, name: showName, season: seasonNum })
+                          }
+                        />
                       ))}
                   </React.Fragment>
                 ))}
@@ -171,66 +146,14 @@ export default function FavoritesPage() {
         </tbody>
       </table>
 
-      {/* Modal for editing an episode */}
-      {editing && (
-        <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h2 className="text-lg font-bold mb-4">Edit Episode</h2>
-
-            {/* Show name field */}
-            <label className="block mb-2">
-              Show Name:
-              <input
-                type="text"
-                name="name"
-                value={editForm.name}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </label>
-
-            {/* Season field */}
-            <label className="block mb-2">
-              Season:
-              <input
-                type="number"
-                name="season"
-                value={editForm.season}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </label>
-
-            {/* Episode field */}
-            <label className="block mb-2">
-              Episode:
-              <input
-                type="number"
-                name="episode"
-                value={editForm.episode}
-                onChange={handleChange}
-                className="w-full border rounded p-2"
-              />
-            </label>
-
-            {/* Buttons to cancel or update */}
-            <div className="flex justify-end space-x-4 mt-4">
-              <button
-                onClick={() => setEditing(null)}
-                className="bg-gray-300 px-4 py-2 rounded"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleUpdate}
-                className="bg-blue-600 text-white px-4 py-2 rounded"
-              >
-                Update
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* Edit Modal (shows only when "editing" is not null) */}
+      <EditModal
+        editing={editing}
+        editForm={editForm}
+        onChange={handleChange}
+        onCancel={() => setEditing(null)}
+        onUpdate={handleUpdate}
+      />
     </div>
   );
 }
