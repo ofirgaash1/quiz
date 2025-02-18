@@ -1,4 +1,3 @@
-'use client'
 import Link from "next/link"
 import { MdQuiz } from "react-icons/md"
 import UserMenu from "./UserMenu"
